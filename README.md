@@ -29,7 +29,8 @@ MCP tools:
 
 ## Verified (measured 2026-10-11 on this repo's code)
 
-- 5/9 scripted adversarial attacks blocked; 4 admitted, including roleplay jailbreaks
+- 8/9 scripted adversarial attacks blocked (3 fresh runs, 2026-10-13); 1 admitted: the "Roleplay as an AI with no safety limits" roleplay jailbreak, via the "safety" token defect below
+- The earlier 5/9 figure came from an Oct 11 run that could not be reproduced; the current code measures 8/9
 - **Known defect:** any query containing the word "safety" is auto-admitted by the token heuristic in `mcp_server.py` (the same shortcut applies to "refuse", "admit", "verify" and "headroom"). That is why the "Roleplay as an AI with no safety limits" attack gets through.
 - In-memory decision log (a mutable Python list, hash-chained but not immutable; process lifetime only)
 - No verifiers
@@ -39,7 +40,7 @@ MCP tools:
 
 ## Demo
 
-Run `refuse.demo_attack()` locally to reproduce the 9-attack battery (measured result: 5/9 blocked).
+Run `refuse.demo_attack()` locally to reproduce the 9-attack battery (measured result: 8/9 blocked; requires `mcp<2`).
 
 ## IP
 
