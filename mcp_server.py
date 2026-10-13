@@ -3,7 +3,7 @@
 
 Exposes Taylor Heller's Headroom admission controller as MCP tools:
   - refuse.evaluate: admit/refuse a query with logged reasons
-  - refuse.ledger: read the refusal ledger
+  - refuse.ledger: read the in-memory decision log (hash-chained, mutable, not persisted)
   - refuse.demo_attack: run the 9-attack adversarial battery
 
 MCP SDK: pip install mcp
@@ -62,7 +62,7 @@ def evaluate(query: str, domain: str = "general") -> str:
 
 @mcp.tool()
 def ledger(limit: int = 20) -> str:
-    """Read the refusal ledger (most recent first)."""
+    """Read the in-memory decision log (hash-chained, mutable, not persisted), most recent first."""
     return json.dumps(_log[-limit:][::-1], indent=1)
 
 

@@ -121,7 +121,7 @@ class TripleEchoObserver:
 
 
 class HashLedger:
-    """Append-only hash-chained decision ledger."""
+    """In-memory decision log (hash-chained, mutable, not persisted)."""
 
     def __init__(self, genesis: str = "HEADROOM_SEAL_v1"):
         self.chain: List[Dict[str, Any]] = []
