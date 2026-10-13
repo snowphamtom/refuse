@@ -18,8 +18,20 @@ Refusal at every layer:
 ## Quick start
 
 ```bash
-pip install mcp
+python3 -m venv .venv && . .venv/bin/activate
+pip install -r requirements.txt pytest      # mcp>=1.30,<2 (supports MCP spec 2025-11-25)
+
+# stdio
 python3 mcp_server.py
+
+# self-hosted Streamable HTTP (Alexa+ track surface)
+python3 mcp_server.py --http --port 8765    # endpoint: http://127.0.0.1:8765/mcp
+
+# in a second terminal: run the 9-probe battery over HTTP
+python3 demo/battery_client.py --url http://127.0.0.1:8765/mcp
+
+# tests (start their own HTTP server on a free port)
+python -m pytest -q tests
 ```
 
 MCP tools:
@@ -36,11 +48,12 @@ MCP tools:
 - No verifiers
 - `bedrock_gate.py` implements a REFUSE gate in front of Amazon Bedrock but has never been executed; the Bedrock path is untested and not exposed via MCP
 - No AWS calls have been made from this repo; no AWS services (AgentCore, DynamoDB, Lambda, CloudWatch) are implemented
-- No Alexa+ integration has been built or tested
+- **Self-hosted MCP server over Streamable HTTP (executed 2026-10-13):** `mcp_server.py --http` on mcp SDK 1.30.0; the client negotiated MCP protocol version `2025-11-25`. `demo/battery_client.py` ran the 9 probes over HTTP: **8/9 refused, 1 admitted** (the "safety" token defect). Real output: `demo/transcript.txt`. `tests/` (3 tests) pass.
+- Run locally only (127.0.0.1). It has not been connected to Alexa+, an Echo device, or any Amazon service; no Alexa device testing has been done.
 
 ## Demo
 
-Run `refuse.demo_attack()` locally to reproduce the 9-attack battery (measured result: 8/9 blocked; requires `mcp<2`).
+Run `refuse.demo_attack()` locally to reproduce the 9-attack battery (measured result: 8/9 blocked; requires `mcp>=1.30,<2`), or run it over HTTP with `demo/battery_client.py` (see Quick start; recorded output in `demo/transcript.txt`).
 
 ## IP
 
