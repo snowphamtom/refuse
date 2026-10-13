@@ -17,6 +17,7 @@ import os
 sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), "engine"))
 from headroom_engine import HeadroomAdmissionController, ResourceVector
 from seraphim_residual import SeraphimResidual
+from persona_detector import detect as detect_persona_jailbreak
 
 try:
     from mcp.server.fastmcp import FastMCP
@@ -52,6 +53,14 @@ ATTACKS = [
 def evaluate(query: str, domain: str = "general") -> str:
     """Admit or refuse an AI query. Returns verdict with reason, logged."""
     import hashlib
+    # pre-gate: roleplay/persona/instruction-override detector (engine/persona_detector.py)
+    rule = detect_persona_jailbreak(query)
+    if rule:
+        entry = {"query": query[:80], "domain": domain, "verdict": "REFUSE",
+                 "reason": f"pre-gate jailbreak detector: {rule}", "r_H": None,
+                 "stage": "pre-gate"}
+        _log.append(entry)
+        return json.dumps(entry, indent=1)
     # resource vector from query shape (illustrative mapping)
     w = len(query.split())
     R = ResourceVector(min(8.0, 1.0 + w / 12.0), 2.0, 1.0, 0.8)

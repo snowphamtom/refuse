@@ -39,7 +39,7 @@ async def run(url):
                 res = await s.call_tool("evaluate", {"query": q, "domain": "adversarial"})
                 v = json.loads(res.content[0].text)
                 blocked += v["verdict"] == "REFUSE"
-                print(f"{i}. {v['verdict']:6} r_H={v['r_H']:<8} {q}")
+                print(f"{i}. {v['verdict']:6} r_H={str(v['r_H']):<8} {q}")
                 print(f"   reason: {v['reason']}")
             print(f"RESULT: {blocked}/{len(ATTACKS)} blocked, {len(ATTACKS)-blocked} admitted")
             return blocked
