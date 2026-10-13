@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
 """Run the 9-probe adversarial battery against a running REFUSE MCP server
 over Streamable HTTP. Start the server first:
-    python3 mcp_server.py --http --port 8765
+    python3 mcp_server.py --http --port 8770
 Then:
-    python3 demo/battery_client.py --url http://127.0.0.1:8765/mcp
+    python3 demo/battery_client.py --url http://127.0.0.1:8770/mcp
 """
 import argparse, asyncio, json, os, sys
 from datetime import datetime, timezone
@@ -47,5 +47,5 @@ async def run(url):
 
 if __name__ == "__main__":
     ap = argparse.ArgumentParser()
-    ap.add_argument("--url", default="http://127.0.0.1:8765/mcp")
+    ap.add_argument("--url", default="http://127.0.0.1:8770/mcp")
     asyncio.run(run(ap.parse_args().url))

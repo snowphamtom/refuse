@@ -8,7 +8,7 @@ Exposes Taylor Heller's Headroom admission controller as MCP tools:
 
 MCP SDK: pip install mcp
 Run (stdio):           python3 mcp_server.py
-Run (Streamable HTTP): python3 mcp_server.py --http --port 8765  -> http://127.0.0.1:8765/mcp
+Run (Streamable HTTP): python3 mcp_server.py --http --port 8770  -> http://127.0.0.1:8770/mcp
 """
 import json
 import sys
@@ -99,7 +99,7 @@ if __name__ == "__main__":
     ap.add_argument("--http", action="store_true",
                     help="serve over Streamable HTTP (default: stdio)")
     ap.add_argument("--host", default="127.0.0.1")
-    ap.add_argument("--port", type=int, default=8765)
+    ap.add_argument("--port", type=int, default=8770)
     args = ap.parse_args()
     if args.http:
         mcp.settings.host = args.host

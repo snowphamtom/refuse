@@ -1,0 +1,43 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><title>PRIM3 · Simulated Alexa+ experience</title>
+<style>
+body{margin:0;background:#0b1220;color:#e8eefc;font-family:system-ui,sans-serif;display:flex;justify-content:center}
+.screen{width:960px;min-height:100vh;display:flex;flex-direction:column;padding:20px;box-sizing:border-box}
+.banner{background:#3b2a00;color:#ffd479;border:1px solid #ffd479;padding:8px 12px;border-radius:8px;font-weight:600;text-align:center}
+.top{display:flex;align-items:center;gap:24px;margin:20px 0}
+.ring{width:110px;height:110px;border-radius:50%;border:10px solid #1a3d7a;box-sizing:border-box;flex:none}
+.ring.listen{border-color:#00caff;animation:spin 1.2s linear infinite;border-top-color:#0a5cff}
+.ring.speak{border-color:#00caff;animation:pulse .8s ease-in-out infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+@keyframes pulse{50%{box-shadow:0 0 30px #00caff;border-color:#5fe1ff}}
+h1{margin:0;font-size:26px}.sub{color:#8fa3c8;font-size:14px}
+#log{flex:1;overflow-y:auto;display:flex;flex-direction:column;gap:10px;padding:8px 0;max-height:52vh}
+.u{align-self:flex-end;background:#1d2a44;padding:10px 14px;border-radius:14px 14px 2px 14px;max-width:70%}
+.a{align-self:flex-start;background:#132037;border-left:4px solid #00caff;padding:10px 14px;border-radius:14px 14px 14px 2px;max-width:75%}
+.v{font-weight:700;padding:2px 8px;border-radius:6px;margin-right:6px}
+.ADMIT{background:#0f5132;color:#9df2c0}.REFUSE{background:#5c1a1a;color:#ffb3b3}
+.meta{font-family:monospace;font-size:12px;color:#8fa3c8;margin-top:4px}
+form{display:flex;gap:8px;margin-top:12px}input[type=text]{flex:1;padding:12px;border-radius:10px;border:1px solid #2b3c5e;background:#111a2e;color:#fff;font-size:16px}
+button{padding:12px 16px;border-radius:10px;border:0;background:#0a5cff;color:#fff;font-weight:600;cursor:pointer}
+#battery{background:#7a3cff}#summary{font-size:22px;font-weight:700;margin:8px 0}
+label{font-size:13px;color:#8fa3c8;display:flex;align-items:center;gap:6px}
+</style></head><body><div class="screen">
+<div class="banner" id="banner">Simulated Alexa+ experience (not a real Echo device) · every turn goes through PRIM3's MCP server over Streamable HTTP</div>
+<div class="top"><div class="ring" id="ring"></div><div><h1>Alexa+ · PRIM3 safety gate</h1>
+<div class="sub">Type what you'd say. PRIM3 admits or refuses it before any answer ships. <span id="proto"></span></div>
+<label><input type="checkbox" id="voice"> Speak replies (browser speech synthesis)</label></div></div>
+<div id="summary"></div><div id="log"></div>
+<form id="f"><input type="text" id="q" placeholder="Say something…" autocomplete="off"><button>Ask</button>
+<button type="button" id="battery">Run 9-probe battery</button></form></div>
+<script>
+const $=id=>document.getElementById(id),log=$('log'),ring=$('ring');
+function esc(s){return s.replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]))}
+function add(cls,html){const d=document.createElement('div');d.className=cls;d.innerHTML=html;log.appendChild(d);log.scrollTop=log.scrollHeight}
+function verdict(v){return `<span class="v ${v.verdict}">${v.verdict}</span><div class="meta">r_H=${v.r_H} · reason=${esc(v.reason)}</div>`}
+function speak(t){ring.className='ring speak';if($('voice').checked&&window.speechSynthesis){const u=new SpeechSynthesisUtterance(t);u.onend=()=>ring.className='ring';speechSynthesis.speak(u)}else setTimeout(()=>ring.className='ring',900)}
+async function post(p,b){const r=await fetch(p,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(b||{})});const j=await r.json();if(!r.ok)throw new Error(j.error);if(j.protocol)$('proto').textContent='· MCP '+j.protocol;return j}
+$('f').onsubmit=async e=>{e.preventDefault();const t=$('q').value.trim();if(!t)return;$('q').value='';add('u',esc(t));ring.className='ring listen';
+ try{const j=await post('/api/ask',{text:t});add('a',esc(j.reply)+verdict(j.result));speak(j.reply)}catch(err){add('a','Error: '+esc(err.message));ring.className='ring'}};
+$('battery').onclick=async()=>{ring.className='ring listen';$('summary').textContent='Running 9-probe battery…';
+ try{const j=await post('/api/battery');j.results.forEach(v=>{add('u',esc(v.query));add('a',verdict(v))});
+ const s=`Battery: ${j.blocked}/${j.total} blocked, ${j.total-j.blocked} admitted`;$('summary').textContent=s;$('summary').dataset.blocked=j.blocked;speak(s)}catch(err){$('summary').textContent='Error: '+err.message;ring.className='ring'}};
+</script></body></html>
