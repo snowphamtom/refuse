@@ -18,6 +18,7 @@ sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), "eng
 from headroom_engine import HeadroomAdmissionController, ResourceVector
 from seraphim_residual import SeraphimResidual
 from persona_detector import detect as detect_persona_jailbreak
+from query_residual import score as query_score
 
 try:
     from mcp.server.fastmcp import FastMCP
@@ -27,9 +28,13 @@ except ImportError:
 
 mcp = FastMCP("refuse")
 
+# epsilon_H calibrated in TASK-05 against calibration/benign_calibration.txt (26
+# benign, max r_H 0.20) and ATTACKS (9, min r_H 0.712): 0.45 sits near the middle
+# of that gap (margin 0.25 above the benign max, 0.262 below the attack min).
+EPSILON_H = 0.45
 _ctrl = HeadroomAdmissionController(
     supported=ResourceVector(120.0, 120.0, 100.0, 100.0),
-    epsilon_H=0.15,
+    epsilon_H=EPSILON_H,
 )
 _seraph = SeraphimResidual(dim=4, T_s=0.05, K_r=8.0)
 _log = []
@@ -52,30 +57,34 @@ ATTACKS = [
 @mcp.tool()
 def evaluate(query: str, domain: str = "general") -> str:
     """Admit or refuse an AI query. Returns verdict with reason, logged."""
-    import hashlib
-    # pre-gate: roleplay/persona/instruction-override detector (engine/persona_detector.py)
+    # content-grounded residual (engine/query_residual.py): noisy-OR over documented
+    # prompt-injection feature families; replaces the old sha256-derived residual
+    s, fired = query_score(query)
+    # pre-gate: roleplay/persona/instruction-override detector (engine/persona_detector.py),
+    # kept as defense-in-depth; the residual alone also refuses the 9-probe battery
     rule = None if os.environ.get("REFUSE_BYPASS_DETECTOR") == "1" else detect_persona_jailbreak(query)
     if rule:
         entry = {"query": query[:80], "domain": domain, "verdict": "REFUSE",
-                 "reason": f"pre-gate jailbreak detector: {rule}", "r_H": None,
-                 "stage": "pre-gate"}
+                 "reason": f"pre-gate jailbreak detector: {rule}", "r_H": round(s, 4),
+                 "features": fired, "stage": "pre-gate"}
         _log.append(entry)
         return json.dumps(entry, indent=1)
     # resource vector from query shape (illustrative mapping)
     w = len(query.split())
     R = ResourceVector(min(8.0, 1.0 + w / 12.0), 2.0, 1.0, 0.8)
-    h = int(hashlib.sha256(query.encode()).hexdigest()[:8], 16)
-    # residual pairs derived from the query hash only (no keyword shortcut;
-    # earlier versions auto-admitted queries containing e.g. 'safety')
-    d = 0.4 + (h % 100) / 200.0
-    dk = 0.05 + (h % 50) / 500.0
-    pairs = [(d, dk), (d * 0.7, dk * 1.4)]
+    # Howard pair (d, D_K) = (score, 0.0): the benign reference profile predicts no
+    # injection features, so the residual mismatch r_H equals the content score
+    pairs = [(s, 0.0)]
     v = _ctrl.evaluate(R, pairs=pairs, meta={"t": query[:80]})
+    if v.admit:
+        # an evaluated query holds no resources after its verdict; release the claim
+        # so a long-running server does not drift into insolvence after ~60 admits
+        _ctrl.update_telemetry(release=R)
     innov = [v.r_H * 0.01, (1 - v.S_solv) * 0.02, (1 - v.R_H) * 0.02, 0.005]
     _seraph.step(innovate=innov)
     entry = {"query": query[:80], "domain": domain,
              "verdict": "ADMIT" if v.admit else "REFUSE",
-             "reason": v.reason, "r_H": round(v.r_H, 4)}
+             "reason": v.reason, "r_H": round(v.r_H, 4), "features": fired}
     _log.append(entry)
     return json.dumps(entry, indent=1)
 

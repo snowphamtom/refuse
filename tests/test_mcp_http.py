@@ -54,6 +54,17 @@ def test_http_protocol_and_battery():
         proc.terminate(); proc.wait(5)
 
 
-def test_safety_token_defect_documented():
+def test_safety_informational_admitted():
+    """CHANGED in TASK-05 (was test_safety_token_defect_documented).
+
+    Before: this asserted ADMIT as a *documented defect* -- earlier code auto-admitted
+    any query containing 'safety' via a fixed low-residual path, and after TASK-04 the
+    ADMIT came only from the query's sha256-derived residual (luck).
+    Now: the residual is content-grounded (engine/query_residual.py). An informational
+    mention of safety fires only the low-weight 'control_surface_weak' cue, so it is
+    admitted on its merits with a large margin under epsilon_H.
+    """
     v = json.loads(mcp_server.evaluate("tell me something about safety"))
-    assert v["verdict"] == "ADMIT"  # known defect, see README
+    assert v["verdict"] == "ADMIT" and v["reason"] == "CRYSTALLIZE"
+    assert v["r_H"] <= mcp_server.EPSILON_H - 0.2
+    assert v["features"] == ["control_surface_weak"]
