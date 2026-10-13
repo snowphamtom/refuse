@@ -13,7 +13,7 @@ AI hallucinations aren't a tuning problem — they're an architecture problem. R
 Refusal at every layer:
 - **Headroom admission control** (Members Gate IP, 64/169,264) — the brain that refuses to guess
 - **Fault-refusing codec** (64/170,360) — the data layer that refuses corruption
-- **Seraphim residual witness** — the verifier that catches what slips through
+- **Seraphim residual witness** — a residual score computed inside the engine (not a separate verifier; this repo has no verifiers)
 
 ## Quick start
 
@@ -24,19 +24,21 @@ python3 mcp_server.py
 
 MCP tools:
 - `refuse.evaluate(query, domain)` → `{"verdict": "ADMIT"|"REFUSE", "reason": ..., "r_H": ...}`
-- `refuse.ledger(limit)` → recent verdicts, most recent first
+- `refuse.ledger(limit)` → recent entries from the in-memory decision log, most recent first
 - `refuse.demo_attack()` → runs the 9-attack adversarial battery
 
 ## Verified (measured 2026-10-11 on this repo's code)
 
 - 5/9 scripted adversarial attacks blocked; 4 admitted, including roleplay jailbreaks
-- In-memory hash-chained decision log (process lifetime only)
-
-The 9/9 battery, four-verifier architecture, and 21-entry verified chain belong to the separate Agent Gate prototype (`~/workspace/your_files/refusal_swarm/agent_gate.py`), not to this repo.
+- In-memory decision log (a mutable Python list, hash-chained but not immutable; process lifetime only)
+- No verifiers
+- `bedrock_gate.py` implements a REFUSE gate in front of Amazon Bedrock but has never been executed; the Bedrock path is untested and not exposed via MCP
+- No AWS calls have been made from this repo; no AWS services (AgentCore, DynamoDB, Lambda, CloudWatch) are implemented
+- No Alexa+ integration has been built or tested
 
 ## Demo
 
-Live split-screen demo: [demo link] — standard agent vs REFUSE-wrapped agent on adversarial queries.
+Run `refuse.demo_attack()` locally to reproduce the 9-attack battery (measured result: 5/9 blocked).
 
 ## IP
 
