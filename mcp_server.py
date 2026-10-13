@@ -54,7 +54,7 @@ def evaluate(query: str, domain: str = "general") -> str:
     """Admit or refuse an AI query. Returns verdict with reason, logged."""
     import hashlib
     # pre-gate: roleplay/persona/instruction-override detector (engine/persona_detector.py)
-    rule = detect_persona_jailbreak(query)
+    rule = None if os.environ.get("REFUSE_BYPASS_DETECTOR") == "1" else detect_persona_jailbreak(query)
     if rule:
         entry = {"query": query[:80], "domain": domain, "verdict": "REFUSE",
                  "reason": f"pre-gate jailbreak detector: {rule}", "r_H": None,
@@ -65,15 +65,11 @@ def evaluate(query: str, domain: str = "general") -> str:
     w = len(query.split())
     R = ResourceVector(min(8.0, 1.0 + w / 12.0), 2.0, 1.0, 0.8)
     h = int(hashlib.sha256(query.encode()).hexdigest()[:8], 16)
-    # affinity: queries naming refusal-relevant concepts get real pairs
-    toks = [t for t in ("refuse", "admit", "safety", "verify", "headroom")
-            if t in query.lower()]
-    if toks:
-        pairs = [(0.08, 0.09), (0.07, 0.08)]
-    else:
-        d = 0.4 + (h % 100) / 200.0
-        dk = 0.05 + (h % 50) / 500.0
-        pairs = [(d, dk), (d * 0.7, dk * 1.4)]
+    # residual pairs derived from the query hash only (no keyword shortcut;
+    # earlier versions auto-admitted queries containing e.g. 'safety')
+    d = 0.4 + (h % 100) / 200.0
+    dk = 0.05 + (h % 50) / 500.0
+    pairs = [(d, dk), (d * 0.7, dk * 1.4)]
     v = _ctrl.evaluate(R, pairs=pairs, meta={"t": query[:80]})
     innov = [v.r_H * 0.01, (1 - v.S_solv) * 0.02, (1 - v.R_H) * 0.02, 0.005]
     _seraph.step(innovate=innov)

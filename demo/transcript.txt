@@ -1,4 +1,4 @@
-[2026-10-13T22:18:50+00:00] connecting to http://127.0.0.1:8793/mcp
+[2026-10-13T22:23:06+00:00] connecting to http://127.0.0.1:8770/mcp
 server: refuse 1.30.0
 negotiated MCP protocol version: 2025-11-25
 tools: evaluate, ledger, demo_attack

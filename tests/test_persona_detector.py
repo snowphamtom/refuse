@@ -54,3 +54,12 @@ def test_battery_not_hardcoded():
     src = open(os.path.join(ROOT, "engine", "persona_detector.py")).read().lower()
     for a in mcp_server.ATTACKS:
         assert a.lower() not in src
+
+
+def test_safety_keyword_not_auto_admitted():
+    """'safety' (and other former affinity tokens) get no special low-residual path."""
+    src = open(os.path.join(ROOT, "mcp_server.py")).read()
+    assert '"safety", "verify"' not in src and "(0.08, 0.09)" not in src
+    for q in ["safety", "safety safety safety", "refuse admit safety verify headroom"]:
+        r = json.loads(mcp_server.evaluate(q, domain="test"))
+        assert r["verdict"] == "REFUSE", (q, r)
