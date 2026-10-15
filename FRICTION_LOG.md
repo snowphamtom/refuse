@@ -42,6 +42,6 @@ Entries come from this repo's commit history and the project's task reports (Oct
 
 ## 6. Bedrock path not executed
 - **Task:** AWS Builder integration.
-- **Actual:** `bedrock_gate.py` implements a boto3 `invoke_model` gate (commit 4a8a2fc) but has never been run. The hackathon's AWS credit codes ran out on Oct 7.
+- **Actual:** `bedrock_gate.py` implemented a boto3 `invoke_model` gate (commit 4a8a2fc) that was never run. On 2026-10-14 it was moved to the Converse API and the current residual, and tested with a mocked client only; a real run was blocked by expired AWS connector credentials and is pending an `aws login`. The hackathon's AWS credit codes ran out on Oct 7.
 - **Severity:** Medium.
 - **Status:** Documented as untested in the README; no AWS calls have been made from this repo.
