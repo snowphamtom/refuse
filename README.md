@@ -84,6 +84,8 @@ Run `refuse.demo_attack()` locally to reproduce the 9-attack battery (measured r
 
 Built on Taylor Heller's filed IP (Monsters Ink LLC): 64/169,264 (Members Gate), 64/170,360 (fault-refusing codec). This repo is the hackathon demonstration; the underlying IP is patent-pending.
 
+**PATENT NOTICE:** The underlying admission-control technology demonstrated here is patent-pending (US 64/169,264, 64/170,360). The MIT license in `LICENSE` covers the demonstration code only and grants no rights under those patent applications.
+
 ## License
 
 MIT for the demo code. Underlying admission-control IP is patent-pending — see IP notice above.
