@@ -54,7 +54,7 @@ MCP tools:
 **3 fresh-process verification runs (2026-10-13, 5:31 PM CT; raw JSON in `calibration/runs/`):**
 
 | run | pid | production battery | production benign | residual-only battery | residual-only benign | `demo_attack` |
-|---|---|---|---|---|---|---|
+|---|---|---|---|---|---|
 | 1 | 1057816 | 9/9 refused | 26/26 admitted | 9/9 refused | 26/26 admitted | 9/9 blocked |
 | 2 | 1057865 | 9/9 refused | 26/26 admitted | 9/9 refused | 26/26 admitted | 9/9 blocked |
 | 3 | 1057866 | 9/9 refused | 26/26 admitted | 9/9 refused | 26/26 admitted | 9/9 blocked |
@@ -91,3 +91,5 @@ Built on Taylor Heller's filed IP (Monsters Ink LLC): 64/169,264 (Members Gate),
 ## License
 
 MIT for the demo code. Underlying admission-control IP is patent-pending — see IP notice above.
+
+Commercial or production use of the underlying fault-refusing codec requires a paid license. [checkout link]
