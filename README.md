@@ -92,4 +92,10 @@ Built on Taylor Heller's filed IP (Monsters Ink LLC): 64/169,264 (Members Gate),
 
 MIT for the demo code. Underlying admission-control IP is patent-pending — see IP notice above.
 
-Commercial or production use of the underlying fault-refusing codec requires a paid license. [checkout link]
+Commercial or production use of the underlying fault-refusing codec requires a paid license.
+
+Reference implementation: https://github.com/snowphamtom/codec-reference
+
+Landing: http://codec-reference-pack.netlify.app
+
+Square storefront: https://monsters-ink-107139.square.site
